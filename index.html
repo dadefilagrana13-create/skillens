@@ -2,195 +2,300 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkilLens — Gaming Skills Analyzer</title>
+<title>SkilLens — Level Up Your Game</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  body{font-family:'Inter',system-ui,sans-serif;background:#060b14;color:#e2e8f0}
-  .glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08)}
-  .gradient-text{background:linear-gradient(135deg,#8b5cf6,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .btn{background:linear-gradient(135deg,#8b5cf6,#3b82f6);border:none;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:600;color:white;transition:all .2s}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(139,92,246,.4)}
-  input,textarea,select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e2e8f0;width:100%}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:#8b5cf6}
-  .gamer-card{background:linear-gradient(145deg,rgba(139,92,246,.08),rgba(59,130,246,.05));border:1px solid rgba(139,92,246,.2);border-radius:16px;padding:20px;transition:all .3s}
-  .gamer-card:hover{border-color:rgba(139,92,246,.5);transform:translateY(-2px)}
-  .rank-badge{padding:3px 12px;border-radius:999px;font-size:11px;font-weight:700}
-  .tab-active{background:rgba(139,92,246,.2);border-bottom:2px solid #8b5cf6}
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080c14;color:#e2e8f0;font-family:'Inter',sans-serif;min-height:100vh}
+h1,h2,.title-font{font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.neon{color:#a855f7;text-shadow:0 0 20px rgba(168,85,247,.5)}
+.neon-border{border:1px solid rgba(168,85,247,.3);box-shadow:0 0 15px rgba(168,85,247,.08) inset}
+.topbar{background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.06);padding:0 36px;display:flex;align-items:center;gap:0}
+.logo-wrap{padding:18px 0;margin-right:40px;display:flex;align-items:center;gap:12px}
+.logo-hex{width:40px;height:40px;background:linear-gradient(135deg,#a855f7,#6366f1);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-link{padding:20px 18px;font-size:14px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.4);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-link:hover{color:rgba(255,255,255,.8)}
+.nav-link.active{color:#a855f7;border-bottom-color:#a855f7}
+.main{padding:32px 36px 60px;max-width:1200px}
+.panel{display:none}.panel.active{display:block}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.hstat{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.hstat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a855f7,#6366f1)}
+.hstat-num{font-size:28px;font-weight:700;font-family:'Rajdhani',sans-serif;color:#a855f7}
+.hstat-label{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500}
+.profile-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;transition:all .3s}
+.profile-card:hover{border-color:rgba(168,85,247,.4);transform:translateY(-3px)}
+.pc-header{height:70px;display:flex;align-items:center;padding:0 18px;gap:14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.pc-avatar{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;font-family:'Rajdhani',sans-serif}
+.rank-chip{padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.pc-body{padding:16px 18px}
+.win-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:4px}
+.win-fill{height:100%;background:linear-gradient(90deg,#a855f7,#6366f1);border-radius:3px}
+.session-row{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;transition:all .2s;margin-bottom:8px}
+.session-row:hover{border-color:rgba(168,85,247,.3)}
+.result-badge{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;font-family:'Rajdhani',sans-serif}
+label{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px;margin-top:12px}
+input,select,textarea{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 13px;color:#e2e8f0;width:100%;font-size:14px;outline:none;transition:border .2s;font-family:'Inter',sans-serif}
+input:focus,select:focus,textarea:focus{border-color:rgba(168,85,247,.6)}
+select option{background:#0d0d1a}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;color:#fff;padding:10px 22px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-purple:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(168,85,247,.35)}
+.btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:9px 18px;border-radius:8px;font-weight:500;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-ghost:hover{border-color:rgba(168,85,247,.5);color:#a855f7}
+.form-box{background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.15);border-radius:14px;padding:24px;margin-bottom:20px;display:none}
+.form-box.open{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.coaching-out{background:rgba(0,0,0,.3);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:20px;min-height:220px;font-size:14px;line-height:1.8}
+.team-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px;transition:all .2s}
+.team-card:hover{border-color:rgba(168,85,247,.3)}
 </style>
 </head>
 <body>
-<nav class="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-xl">🎮</div>
-    <div><h1 class="font-black text-xl gradient-text">SkilLens</h1><p class="text-xs text-slate-400">Gaming Skills Analytics</p></div>
-  </div>
-  <div class="flex gap-2">
-    <button onclick="showTab('profiles')" id="tab-profiles" class="px-4 py-2 rounded-lg text-sm font-medium tab-active transition-all">Profiles</button>
-    <button onclick="showTab('sessions')" id="tab-sessions" class="px-4 py-2 rounded-lg text-sm font-medium transition-all">Sessions</button>
-    <button onclick="showTab('teams')" id="tab-teams" class="px-4 py-2 rounded-lg text-sm font-medium transition-all">Teams</button>
-    <button onclick="showTab('analyze')" id="tab-analyze" class="px-4 py-2 rounded-lg text-sm font-medium transition-all"><i class="fas fa-robot mr-1"></i>AI Coach</button>
-  </div>
-</nav>
 
-<div class="max-w-6xl mx-auto px-6 py-8">
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-hex">🎮</div>
+    <div>
+      <div class="title-font" style="font-size:20px;font-weight:700">SkilLens</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase">Gaming Analytics</div>
+    </div>
+  </div>
+  <div class="nav-link active" onclick="showTab('profiles')" id="tab-profiles">Profiles</div>
+  <div class="nav-link" onclick="showTab('sessions')" id="tab-sessions">Sessions</div>
+  <div class="nav-link" onclick="showTab('teams')" id="tab-teams">Teams</div>
+  <div class="nav-link" onclick="showTab('coach')" id="tab-coach">AI Coach</div>
+</div>
+
+<div class="main">
+
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-num" id="hs-profiles">0</div><div class="hstat-label">Active Gamers</div></div>
+    <div class="hstat"><div class="hstat-num" id="hs-sessions">0</div><div class="hstat-label">Sessions Logged</div></div>
+    <div class="hstat"><div class="hstat-num" id="hs-winrate">0%</div><div class="hstat-label">Avg Win Rate</div></div>
+    <div class="hstat"><div class="hstat-num" id="hs-teams">0</div><div class="hstat-label">Teams</div></div>
+  </div>
+
   <!-- PROFILES -->
-  <div id="panel-profiles">
-    <div class="flex justify-between items-center mb-6">
-      <div><h2 class="text-2xl font-bold">Gamer Profiles</h2><p class="text-slate-400 text-sm">Your gaming identity and stats</p></div>
-      <button onclick="toggleForm('profile-form')" class="btn"><i class="fas fa-plus mr-2"></i>New Profile</button>
+  <div id="panel-profiles" class="panel active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 class="title-font" style="font-size:22px">Gamer Profiles</h2>
+      <button class="btn-purple" onclick="document.getElementById('pf-form').classList.toggle('open')">+ New Profile</button>
     </div>
-    <div id="profile-form" class="hidden glass rounded-2xl p-6 mb-6">
-      <div class="grid grid-cols-3 gap-4">
-        <div><label class="text-xs text-slate-400 mb-1 block">Username *</label><input id="pr-user" placeholder="YourGamerTag"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Main Game</label><input id="pr-game" placeholder="e.g. Valorant, FIFA, LoL"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Rank</label><input id="pr-rank" placeholder="e.g. Diamond, Plat 2"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Level / Tier</label><input id="pr-level" placeholder="e.g. Pro, Semi-pro, Amateur"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Win Rate (%)</label><input id="pr-wr" type="number" placeholder="55"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Avg KDA</label><input id="pr-kda" placeholder="e.g. 3.2/1.8/4.1"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Total Games</label><input id="pr-games" type="number" placeholder="500"></div>
-        <div class="col-span-2"><label class="text-xs text-slate-400 mb-1 block">Bio</label><input id="pr-bio" placeholder="About your playstyle..."></div>
+    <div class="form-box" id="pf-form">
+      <div class="g3" style="margin-bottom:4px">
+        <div><label>Username *</label><input id="pf-user" placeholder="xXDarkSlayerXx"></div>
+        <div><label>Main Game</label><input id="pf-game" placeholder="Valorant"></div>
+        <div><label>Rank</label><input id="pf-rank" placeholder="Diamond 2"></div>
+        <div><label>Win Rate %</label><input id="pf-wr" type="number" placeholder="58"></div>
+        <div><label>Avg KDA</label><input id="pf-kda" placeholder="3.2 / 1.4 / 5.8"></div>
+        <div><label>Total Games</label><input id="pf-games" type="number" placeholder="842"></div>
       </div>
-      <div class="flex gap-3 mt-4">
-        <button onclick="saveProfile()" class="btn"><i class="fas fa-save mr-2"></i>Save</button>
-        <button onclick="toggleForm('profile-form')" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors">Cancel</button>
+      <label>Bio / Playstyle</label>
+      <textarea id="pf-bio" rows="2" placeholder="Aggressive entry fragger, loves pistol rounds..."></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-purple" onclick="saveProfile()">Create Profile</button>
+        <button class="btn-ghost" onclick="document.getElementById('pf-form').classList.remove('open')">Cancel</button>
       </div>
     </div>
-    <div id="profiles-grid" class="grid grid-cols-3 gap-5"></div>
+    <div class="grid-cards" id="profiles-grid"></div>
   </div>
 
   <!-- SESSIONS -->
-  <div id="panel-sessions" class="hidden">
-    <div class="flex justify-between items-center mb-6">
-      <div><h2 class="text-2xl font-bold">Game Sessions</h2><p class="text-slate-400 text-sm">Track your performance over time</p></div>
-      <button onclick="toggleForm('session-form')" class="btn"><i class="fas fa-plus mr-2"></i>Log Session</button>
+  <div id="panel-sessions" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 class="title-font" style="font-size:22px">Session Log</h2>
+      <button class="btn-purple" onclick="document.getElementById('ss-form').classList.toggle('open')">+ Log Session</button>
     </div>
-    <div id="session-form" class="hidden glass rounded-2xl p-6 mb-6">
-      <div class="grid grid-cols-4 gap-4">
-        <div><label class="text-xs text-slate-400 mb-1 block">Game</label><input id="ss-game" placeholder="Valorant"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Result</label><select id="ss-result"><option>Win</option><option>Loss</option><option>Draw</option></select></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">KDA</label><input id="ss-kda" placeholder="25/10/8"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Duration (min)</label><input id="ss-dur" type="number" placeholder="45"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Kills</label><input id="ss-kills" type="number" placeholder="25"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Deaths</label><input id="ss-deaths" type="number" placeholder="10"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Assists</label><input id="ss-assists" type="number" placeholder="8"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Score</label><input id="ss-score" type="number" placeholder="4800"></div>
-        <div class="col-span-4"><label class="text-xs text-slate-400 mb-1 block">Notes / What went well/wrong?</label><textarea id="ss-notes" rows="2" placeholder="Key plays, mistakes, what to improve..."></textarea></div>
+    <div class="form-box" id="ss-form">
+      <div class="g3" style="margin-bottom:4px">
+        <div><label>Game *</label><input id="ss-game" placeholder="Valorant"></div>
+        <div><label>Result</label><select id="ss-result"><option>Win</option><option>Loss</option><option>Draw</option></select></div>
+        <div><label>KDA</label><input id="ss-kda" placeholder="28 / 11 / 6"></div>
+        <div><label>Kills</label><input id="ss-kills" type="number" placeholder="28"></div>
+        <div><label>Deaths</label><input id="ss-deaths" type="number" placeholder="11"></div>
+        <div><label>Assists</label><input id="ss-assists" type="number" placeholder="6"></div>
+        <div><label>Score</label><input id="ss-score" type="number" placeholder="5200"></div>
+        <div><label>Duration (min)</label><input id="ss-dur" type="number" placeholder="42"></div>
       </div>
-      <div class="flex gap-3 mt-4">
-        <button onclick="saveSession()" class="btn"><i class="fas fa-save mr-2"></i>Log it</button>
-        <button onclick="toggleForm('session-form')" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors">Cancel</button>
+      <label>Notes</label>
+      <textarea id="ss-notes" rows="2" placeholder="What went well? What to fix next time?"></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-purple" onclick="saveSession()">Log Session</button>
+        <button class="btn-ghost" onclick="document.getElementById('ss-form').classList.remove('open')">Cancel</button>
       </div>
     </div>
-    <div id="sessions-list" class="space-y-3"></div>
+    <div id="sessions-list"></div>
   </div>
 
   <!-- TEAMS -->
-  <div id="panel-teams" class="hidden">
-    <div class="flex justify-between items-center mb-6">
-      <div><h2 class="text-2xl font-bold">Teams & Orgs</h2><p class="text-slate-400 text-sm">Find teams or post yours</p></div>
-      <button onclick="toggleForm('team-form')" class="btn"><i class="fas fa-plus mr-2"></i>Create Team</button>
+  <div id="panel-teams" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 class="title-font" style="font-size:22px">Teams & Orgs</h2>
+      <button class="btn-purple" onclick="document.getElementById('tm-form').classList.toggle('open')">+ Create Team</button>
     </div>
-    <div id="team-form" class="hidden glass rounded-2xl p-6 mb-6">
-      <div class="grid grid-cols-3 gap-4">
-        <div><label class="text-xs text-slate-400 mb-1 block">Team Name *</label><input id="t-name" placeholder="Team Name"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Game</label><input id="t-game" placeholder="Valorant, LoL..."></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Min Rank Required</label><input id="t-rank" placeholder="Diamond+"></div>
-        <div class="col-span-2"><label class="text-xs text-slate-400 mb-1 block">Description & Requirements</label><input id="t-desc" placeholder="Looking for IGL, aggressive players..."></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Contact</label><input id="t-contact" placeholder="Discord: user#1234"></div>
+    <div class="form-box" id="tm-form">
+      <div class="g3" style="margin-bottom:4px">
+        <div><label>Team Name *</label><input id="tm-name" placeholder="Team Nexus"></div>
+        <div><label>Game</label><input id="tm-game" placeholder="Valorant"></div>
+        <div><label>Min Rank</label><input id="tm-rank" placeholder="Diamond+"></div>
+        <div class="col-span-2"><label>Description</label><input id="tm-desc" placeholder="Competitive team, 5 nights/week..."></div>
+        <div><label>Contact</label><input id="tm-contact" placeholder="Discord: nexus#1234"></div>
       </div>
-      <div class="flex gap-3 mt-4">
-        <button onclick="saveTeam()" class="btn"><i class="fas fa-save mr-2"></i>Create</button>
-        <button onclick="toggleForm('team-form')" class="px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors">Cancel</button>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-purple" onclick="saveTeam()">Create</button>
+        <button class="btn-ghost" onclick="document.getElementById('tm-form').classList.remove('open')">Cancel</button>
       </div>
     </div>
-    <div id="teams-list" class="grid grid-cols-3 gap-4"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px" id="teams-list"></div>
   </div>
 
   <!-- AI COACH -->
-  <div id="panel-analyze" class="hidden">
-    <div class="mb-6"><h2 class="text-2xl font-bold">AI Gaming Coach</h2><p class="text-slate-400 text-sm">Personalized analysis and improvement plan</p></div>
-    <div class="grid grid-cols-2 gap-6">
-      <div class="glass rounded-2xl p-6 space-y-4">
-        <div><label class="text-xs text-slate-400 mb-1 block">Game & Role</label><input id="ai-game" placeholder="e.g. Valorant, Duelist, Diamond rank"></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Recent Stats</label><textarea id="ai-stats" rows="3" placeholder="Win rate: 52%, KDA: 2.8, headshot: 22%, clutch rate: 30%..."></textarea></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Goal</label><input id="ai-goal" placeholder="e.g. Reach Radiant, join a team, improve aim..."></div>
-        <div><label class="text-xs text-slate-400 mb-1 block">Biggest Problem</label><input id="ai-problem" placeholder="e.g. I lose duels mid-game, bad rotations..."></div>
-        <button onclick="analyzePlayer()" class="btn w-full"><i class="fas fa-brain mr-2"></i>Get AI Coaching Plan</button>
+  <div id="panel-coach" class="panel">
+    <h2 class="title-font" style="font-size:22px;margin-bottom:20px">AI Gaming Coach 🧠</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div style="background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.15);border-radius:14px;padding:24px">
+          <label>Game & Role</label><input id="ai-game" placeholder="Valorant — Duelist, Diamond rank">
+          <label>Recent Stats</label><textarea id="ai-stats" rows="3" placeholder="WR: 54%, KDA: 2.8, HS%: 24%, first blood: 35%..."></textarea>
+          <label>Your Goal</label><input id="ai-goal" placeholder="Reach Radiant / join a team">
+          <label>Biggest Weakness</label><input id="ai-weak" placeholder="I lose duels in mid-game...">
+          <button class="btn-purple" style="width:100%;margin-top:16px;padding:13px" onclick="getCoach()">🎯 Get Coaching Plan</button>
+        </div>
       </div>
-      <div class="glass rounded-2xl p-6">
-        <h3 class="font-semibold mb-4 gradient-text">Your Coaching Plan</h3>
-        <div id="coaching-result" class="text-slate-400 text-sm flex flex-col items-center justify-center h-40 opacity-50">
-          <span class="text-4xl mb-3">🎮</span><p>Submit your stats to get a coaching plan</p>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Your Plan</div>
+        <div class="coaching-out" id="coach-out">
+          <div style="color:rgba(255,255,255,.25);text-align:center;padding:40px 0"><div style="font-size:40px;margin-bottom:10px">🎮</div>Submit your stats to get a personalized coaching plan</div>
         </div>
       </div>
     </div>
   </div>
+
 </div>
 
-<div id="toast" class="fixed bottom-6 right-6 px-6 py-3 rounded-xl font-semibold hidden z-50 text-white"></div>
-
 <script>
-const SUPABASE_URL='https://nmulrsbqdeqokvrybapn.supabase.co'
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tdWxyc2JxZGVxb2t2cnliYXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyODY0NDcsImV4cCI6MjA5NDg2MjQ0N30.iGN_OGVkw0j3VCEi9qUroMbpT37P3UPRUf1cYyqFBys'
-const GROQ_KEY='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'
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
-function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`fixed bottom-6 right-6 px-6 py-3 rounded-xl font-semibold z-50 text-white ${type==='error'?'bg-red-600':'bg-purple-600'}`;setTimeout(()=>t.classList.add('hidden'),3000)}
-function toggleForm(id){document.getElementById(id).classList.toggle('hidden')}
-function showTab(tab){['profiles','sessions','teams','analyze'].forEach(t=>{document.getElementById(`panel-${t}`).classList.add('hidden');document.getElementById(`tab-${t}`).classList.remove('tab-active')});document.getElementById(`panel-${tab}`).classList.remove('hidden');document.getElementById(`tab-${tab}`).classList.add('tab-active');if(tab==='profiles')loadProfiles();if(tab==='sessions')loadSessions();if(tab==='teams')loadTeams()}
+const SB=supabase.createClient('https://nmulrsbqdeqokvrybapn.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tdWxyc2JxZGVxb2t2cnliYXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyODY0NDcsImV4cCI6MjA5NDg2MjQ0N30.iGN_OGVkw0j3VCEi9qUroMbpT37P3UPRUf1cYyqFBys')
+const GROQ='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'
+
+function showTab(t){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));document.getElementById('panel-'+t).classList.add('active');document.getElementById('tab-'+t).classList.add('active');const fn={profiles:loadProfiles,sessions:loadSessions,teams:loadTeams};if(fn[t])fn[t]()}
+
+const rankColors={Radiant:'#ff4655',Immortal:'#ff7070',Diamond:'#a78bfa',Platinum:'#38bdf8',Gold:'#fbbf24',Silver:'#94a3b8',Bronze:'#b45309',Iron:'#64748b'}
+function rankColor(rank){for(const[k,v] of Object.entries(rankColors)){if((rank||'').toLowerCase().includes(k.toLowerCase()))return v}return '#a855f7'}
+const avBgs=['#a855f7','#6366f1','#ec4899','#f59e0b','#10b981']
+
+async function seedData(){
+  const{data}=await SB.from('sl_profiles').select('id').limit(1)
+  if(data?.length)return
+  await SB.from('sl_profiles').insert([
+    {username:'NightHawk_IT',main_game:'Valorant',rank:'Radiant',level:'Pro',win_rate:68,avg_kda:'3.8/1.2/4.1',total_games:1200,bio:'Entry fragger. Clutch king. Former LANs player.'},
+    {username:'xSilverBlaze',main_game:'League of Legends',rank:'Diamond 1',level:'Semi-pro',win_rate:57,avg_kda:'7.2/3.1/8.4',total_games:2840,bio:'Jungle main. Macro-focused. Top 0.1% EUW.'},
+    {username:'Pixel_Queen',main_game:'Apex Legends',rank:'Predator',level:'Pro',win_rate:62,avg_kda:'4.1/1.8/6.2',total_games:870,bio:'Movement queen. 3-stack comp player.'},
+  ])
+  await SB.from('sl_sessions').insert([
+    {game:'Valorant',result:'Win',kda:'32/8/5',kills:32,deaths:8,assists:5,score:6400,duration:38,notes:'Perfect aimbot round on Ascent. New high score.'},
+    {game:'Valorant',result:'Loss',kda:'14/18/3',kills:14,deaths:18,assists:3,score:2800,duration:44,notes:'Lost duels constantly. Need to work on peeking.'},
+    {game:'Valorant',result:'Win',kda:'26/11/9',kills:26,deaths:11,assists:9,score:5100,duration:41,notes:'Good comms today. Clutched 1v3 on last round.'},
+  ])
+  await SB.from('sl_teams').insert([
+    {name:'Nexus Esports',game:'Valorant',recruiting:true,min_rank:'Diamond',description:'Serious team, 5 nights/week. Looking for IGL.',contact:'Discord: nexus_coach#0001'},
+    {name:'VoidWalkers',game:'League of Legends',recruiting:true,min_rank:'Platinum',description:'Chill team, climb together. EUW server.',contact:'IG: @voidwalkers_eu'},
+  ])
+}
+
+async function loadProfiles(){
+  const{data}=await SB.from('sl_profiles').select('*').order('created_at',{ascending:false})
+  const{data:ss}=await SB.from('sl_sessions').select('*')
+  const{data:tm}=await SB.from('sl_teams').select('*')
+  document.getElementById('hs-profiles').textContent=data?.length||0
+  document.getElementById('hs-sessions').textContent=ss?.length||0
+  const wrs=(data||[]).filter(p=>p.win_rate)
+  document.getElementById('hs-winrate').textContent=wrs.length?Math.round(wrs.reduce((s,p)=>s+p.win_rate,0)/wrs.length)+'%':'—'
+  document.getElementById('hs-teams').textContent=tm?.length||0
+  const grid=document.getElementById('profiles-grid')
+  if(!data?.length){grid.innerHTML='<div style="color:rgba(255,255,255,.3);grid-column:1/-1;text-align:center;padding:48px">No profiles yet</div>';return}
+  grid.innerHTML=data.map((p,i)=>`<div class="profile-card">
+    <div class="pc-header">
+      <div class="pc-avatar" style="background:${avBgs[i%avBgs.length]}22;color:${avBgs[i%avBgs.length]}">${(p.username||'?')[0].toUpperCase()}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:15px">${p.username}</div><div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${p.main_game||'—'}</div></div>
+      <span class="rank-chip" style="background:${rankColor(p.rank)}22;color:${rankColor(p.rank)}">${p.rank||'Unranked'}</span>
+    </div>
+    <div class="pc-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;margin-bottom:10px">
+        ${p.win_rate?`<div><div style="font-size:17px;font-weight:700;color:#a855f7">${p.win_rate}%</div><div style="font-size:10px;color:rgba(255,255,255,.35)">WIN RATE</div></div>`:''}
+        <div><div style="font-size:17px;font-weight:700;color:#6366f1">${p.avg_kda||'—'}</div><div style="font-size:10px;color:rgba(255,255,255,.35)">KDA</div></div>
+        ${p.total_games?`<div><div style="font-size:17px;font-weight:700;color:#ec4899">${p.total_games.toLocaleString()}</div><div style="font-size:10px;color:rgba(255,255,255,.35)">GAMES</div></div>`:''}
+      </div>
+      ${p.win_rate?`<div class="win-bar"><div class="win-fill" style="width:${p.win_rate}%"></div></div>`:''} 
+      ${p.bio?`<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:10px;font-style:italic">"${p.bio}"</div>`:''}
+    </div>
+  </div>`).join('')
+}
 
 async function saveProfile(){
-  const d={username:document.getElementById('pr-user').value,main_game:document.getElementById('pr-game').value,rank:document.getElementById('pr-rank').value,level:document.getElementById('pr-level').value,win_rate:parseInt(document.getElementById('pr-wr').value)||null,avg_kda:document.getElementById('pr-kda').value,total_games:parseInt(document.getElementById('pr-games').value)||null,bio:document.getElementById('pr-bio').value}
-  if(!d.username){showToast('Username required','error');return}
-  const{error}=await sb.from('sl_profiles').insert(d)
-  if(error){showToast('Error: '+error.message,'error');return}
-  showToast('✅ Profile created!');toggleForm('profile-form');loadProfiles()
+  const d={username:document.getElementById('pf-user').value,main_game:document.getElementById('pf-game').value,rank:document.getElementById('pf-rank').value,level:'Amateur',win_rate:parseInt(document.getElementById('pf-wr').value)||null,avg_kda:document.getElementById('pf-kda').value,total_games:parseInt(document.getElementById('pf-games').value)||null,bio:document.getElementById('pf-bio').value}
+  if(!d.username)return
+  await SB.from('sl_profiles').insert(d);document.getElementById('pf-form').classList.remove('open');loadProfiles()
 }
+
 async function saveSession(){
-  const d={game:document.getElementById('ss-game').value,result:document.getElementById('ss-result').value,kda:document.getElementById('ss-kda').value,duration:parseInt(document.getElementById('ss-dur').value)||null,kills:parseInt(document.getElementById('ss-kills').value)||null,deaths:parseInt(document.getElementById('ss-deaths').value)||null,assists:parseInt(document.getElementById('ss-assists').value)||null,score:parseInt(document.getElementById('ss-score').value)||null,notes:document.getElementById('ss-notes').value}
-  if(!d.game){showToast('Game required','error');return}
-  const{error}=await sb.from('sl_sessions').insert(d)
-  if(error){showToast('Error: '+error.message,'error');return}
-  showToast('✅ Session logged!');toggleForm('session-form');loadSessions()
+  const d={game:document.getElementById('ss-game').value,result:document.getElementById('ss-result').value,kda:document.getElementById('ss-kda').value,kills:parseInt(document.getElementById('ss-kills').value)||null,deaths:parseInt(document.getElementById('ss-deaths').value)||null,assists:parseInt(document.getElementById('ss-assists').value)||null,score:parseInt(document.getElementById('ss-score').value)||null,duration:parseInt(document.getElementById('ss-dur').value)||null,notes:document.getElementById('ss-notes').value}
+  if(!d.game)return
+  await SB.from('sl_sessions').insert(d);document.getElementById('ss-form').classList.remove('open');loadSessions()
 }
-async function saveTeam(){
-  const d={name:document.getElementById('t-name').value,game:document.getElementById('t-game').value,min_rank:document.getElementById('t-rank').value,description:document.getElementById('t-desc').value,contact:document.getElementById('t-contact').value,recruiting:true}
-  if(!d.name){showToast('Name required','error');return}
-  const{error}=await sb.from('sl_teams').insert(d)
-  if(error){showToast('Error: '+error.message,'error');return}
-  showToast('✅ Team created!');toggleForm('team-form');loadTeams()
-}
-async function loadProfiles(){
-  const{data}=await sb.from('sl_profiles').select('*').order('created_at',{ascending:false})
-  const grid=document.getElementById('profiles-grid')
-  if(!data?.length){grid.innerHTML='<div class="col-span-3 glass rounded-xl p-8 text-center text-slate-400"><span class="text-4xl block mb-3">🎮</span>No profiles yet</div>';return}
-  grid.innerHTML=data.map(p=>`<div class="gamer-card"><div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-700 flex items-center justify-center text-xl font-black text-white">${p.username?.[0]?.toUpperCase()||'?'}</div><button onclick="deleteRec('sl_profiles','${p.id}',loadProfiles)" class="text-slate-600 hover:text-red-400"><i class="fas fa-trash text-sm"></i></button></div><h3 class="font-bold text-lg">${p.username}</h3><p class="text-sm text-purple-400">${p.main_game||'No game'} · ${p.rank||'Unranked'}</p><div class="grid grid-cols-3 gap-2 mt-3 text-center">${p.win_rate?`<div class="glass rounded-lg p-2"><div class="text-sm font-bold text-blue-400">${p.win_rate}%</div><div class="text-xs text-slate-500">Win Rate</div></div>`:''}<div class="glass rounded-lg p-2"><div class="text-sm font-bold text-purple-400">${p.avg_kda||'N/A'}</div><div class="text-xs text-slate-500">KDA</div></div>${p.total_games?`<div class="glass rounded-lg p-2"><div class="text-sm font-bold text-cyan-400">${p.total_games}</div><div class="text-xs text-slate-500">Games</div></div>`:''}</div>${p.bio?`<p class="text-xs text-slate-400 mt-3">${p.bio}</p>`:''}</div>`).join('')
-}
+
 async function loadSessions(){
-  const{data}=await sb.from('sl_sessions').select('*').order('created_at',{ascending:false})
+  const{data}=await SB.from('sl_sessions').select('*').order('created_at',{ascending:false})
   const list=document.getElementById('sessions-list')
-  if(!data?.length){list.innerHTML='<div class="glass rounded-xl p-8 text-center text-slate-400"><span class="text-4xl block mb-3">🎯</span>No sessions logged</div>';return}
-  list.innerHTML=data.map(s=>`<div class="glass rounded-xl p-4 flex items-center gap-4"><div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold ${s.result==='Win'?'bg-green-500/20 text-green-400':s.result==='Loss'?'bg-red-500/20 text-red-400':'bg-slate-500/20 text-slate-400'}">${s.result==='Win'?'W':s.result==='Loss'?'L':'D'}</div><div class="flex-1"><div class="flex items-center gap-3"><span class="font-medium">${s.game}</span>${s.kda?`<span class="text-xs text-slate-400">KDA: ${s.kda}</span>`:''}</div><div class="text-xs text-slate-500 mt-0.5">${s.notes?s.notes.substring(0,60)+'...':''}</div></div><div class="text-right text-xs text-slate-500">${s.score?`Score: ${s.score}`:''}${s.duration?`<br>${s.duration}min`:''}</div><button onclick="deleteRec('sl_sessions','${s.id}',loadSessions)" class="text-slate-600 hover:text-red-400"><i class="fas fa-trash text-sm"></i></button></div>`).join('')
+  if(!data?.length){list.innerHTML='<div style="color:rgba(255,255,255,.3);text-align:center;padding:48px">No sessions logged</div>';return}
+  const wins=data.filter(s=>s.result==='Win').length
+  list.innerHTML=`<div style="display:flex;gap:16px;margin-bottom:16px">
+    <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px 20px;text-align:center"><div style="font-size:20px;font-weight:700;color:#4ade80">${wins}</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Wins</div></div>
+    <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:12px 20px;text-align:center"><div style="font-size:20px;font-weight:700;color:#f87171">${data.length-wins}</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Losses</div></div>
+    <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:10px;padding:12px 20px;text-align:center"><div style="font-size:20px;font-weight:700;color:#a855f7">${data.length>0?Math.round(wins/data.length*100):0}%</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Win Rate</div></div>
+  </div>`+
+  data.map(s=>`<div class="session-row">
+    <div class="result-badge" style="background:${s.result==='Win'?'rgba(74,222,128,.15)':'rgba(248,113,113,.15)'};color:${s.result==='Win'?'#4ade80':'#f87171'}">${s.result==='Win'?'W':'L'}</div>
+    <div style="flex:1"><div style="font-weight:600">${s.game}</div><div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${s.kda?'KDA: '+s.kda+' ·':''} ${s.score?'Score: '+s.score.toLocaleString():''} ${s.duration?'· '+s.duration+'min':''}</div></div>
+    ${s.notes?`<div style="font-size:12px;color:rgba(255,255,255,.35);max-width:200px;text-align:right;font-style:italic">"${s.notes.substring(0,50)}..."</div>`:''}
+  </div>`).join('')
 }
+
+async function saveTeam(){
+  const d={name:document.getElementById('tm-name').value,game:document.getElementById('tm-game').value,min_rank:document.getElementById('tm-rank').value,description:document.getElementById('tm-desc').value,contact:document.getElementById('tm-contact').value,recruiting:true}
+  if(!d.name)return
+  await SB.from('sl_teams').insert(d);document.getElementById('tm-form').classList.remove('open');loadTeams()
+}
+
 async function loadTeams(){
-  const{data}=await sb.from('sl_teams').select('*').order('created_at',{ascending:false})
+  const{data}=await SB.from('sl_teams').select('*').order('created_at',{ascending:false})
   const list=document.getElementById('teams-list')
-  if(!data?.length){list.innerHTML='<div class="col-span-3 glass rounded-xl p-8 text-center text-slate-400"><span class="text-4xl block mb-3">🏆</span>No teams yet</div>';return}
-  list.innerHTML=data.map(t=>`<div class="gamer-card"><div class="flex justify-between mb-2"><h3 class="font-bold">${t.name}</h3><button onclick="deleteRec('sl_teams','${t.id}',loadTeams)" class="text-slate-600 hover:text-red-400"><i class="fas fa-trash text-sm"></i></button></div><p class="text-sm text-purple-400">${t.game||'Various games'}</p>${t.min_rank?`<p class="text-xs text-slate-400 mt-1">Min rank: ${t.min_rank}</p>`:''}<p class="text-sm text-slate-400 mt-2">${t.description||''}</p>${t.contact?`<p class="text-xs text-cyan-400 mt-3">${t.contact}</p>`:''}</div>`).join('')
+  if(!data?.length){list.innerHTML='<div style="color:rgba(255,255,255,.3);grid-column:1/-1;text-align:center;padding:48px">No teams yet</div>';return}
+  list.innerHTML=data.map(t=>`<div class="team-card">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+      <div><div style="font-weight:700;font-size:16px">${t.name}</div><div style="font-size:12px;color:#a855f7;margin-top:2px">${t.game||'Multi-game'}</div></div>
+      ${t.recruiting?`<span style="background:rgba(74,222,128,.15);color:#4ade80;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">RECRUITING</span>`:''}
+    </div>
+    ${t.min_rank?`<div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:8px">Min rank: ${t.min_rank}</div>`:''}
+    <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:10px">${t.description||''}</p>
+    ${t.contact?`<div style="font-size:12px;color:#6366f1;font-weight:500">${t.contact}</div>`:''}
+  </div>`).join('')
 }
-async function analyzePlayer(){
-  const game=document.getElementById('ai-game').value,stats=document.getElementById('ai-stats').value,goal=document.getElementById('ai-goal').value,problem=document.getElementById('ai-problem').value
-  if(!game){showToast('Fill game info','error');return}
-  document.getElementById('coaching-result').innerHTML='<div class="flex items-center gap-3 text-purple-400"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div><span>Creating your coaching plan...</span></div>'
-  try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:`You are an elite esports coach. Create a coaching plan.\n\nGAME & ROLE: ${game}\nSTATS: ${stats}\nGOAL: ${goal}\nBIGGEST PROBLEM: ${problem}\n\nProvide:\n1. SKILL ASSESSMENT (rating the main areas)\n2. TOP 3 IMMEDIATE IMPROVEMENTS\n3. DAILY TRAINING ROUTINE (specific drills)\n4. MENTAL GAME tips\n5. TIMELINE to reach goal\n\nBe specific, actionable, no fluff.`}]})})
-    const data=await res.json()
-    document.getElementById('coaching-result').innerHTML=`<div class="text-sm text-slate-300 whitespace-pre-line leading-relaxed">${(data.choices?.[0]?.message?.content||'').replace(/\*\*(.*?)\*\*/g,'<strong class="text-purple-400">$1</strong>').replace(/\n/g,'<br>')}</div>`
-  }catch(e){document.getElementById('coaching-result').innerHTML='<p class="text-red-400">Error: '+e.message+'</p>'}
+
+async function getCoach(){
+  const game=document.getElementById('ai-game').value,stats=document.getElementById('ai-stats').value,goal=document.getElementById('ai-goal').value,weak=document.getElementById('ai-weak').value
+  if(!game)return
+  document.getElementById('coach-out').innerHTML='<div style="color:#a855f7;text-align:center;padding:30px">🎮 Building your coaching plan...</div>'
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:700,messages:[{role:'user',content:`You are an elite esports coach. Create a coaching plan.\n\nGame & Role: ${game}\nStats: ${stats}\nGoal: ${goal}\nWeakness: ${weak}\n\nProvide:\n**SKILL RATING:** X/10 per area\n**TOP 3 IMPROVEMENTS for this week:**\n1...\n**DAILY TRAINING (30 min):**\n...\n**MENTAL GAME TIP:**\n...\n**TIMELINE to goal:**\n...\n\nBe specific and actionable.`}]})})
+  const d=await res.json()
+  document.getElementById('coach-out').innerHTML=`<div style="font-size:14px;line-height:1.8">${(d.choices?.[0]?.message?.content||'').replace(/\*\*(.*?)\*\*/g,'<strong style="color:#a855f7">$1</strong>').replace(/\n/g,'<br>')}</div>`
 }
-async function deleteRec(table,id,reload){if(!confirm('Delete?'))return;await sb.from(table).delete().eq('id',id);reload()}
-loadProfiles()
+
+async function init(){await seedData();loadProfiles()}
+init()
 </script>
 </body>
 </html>
